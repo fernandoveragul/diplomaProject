@@ -4,16 +4,15 @@
 ``` commandline
 about porject
   [
-      frontend = vue.js
-      backend = fastapi
-      dokerfiles and docker-compose file using
+    frontend = vue.js
+    backend = fastapi
   ] 
 ```
 ``` commandline
 authors
   [
-      LEVIATHAN EQUILIBRIST
-      AND
-      WITCHERLIKE
+    LEVIATHAN EQUILIBRIST
+    AND
+    WITCHERLIKE
   ]
 ```
