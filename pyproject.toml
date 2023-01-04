@@ -12,9 +12,9 @@ alembic = "^1.9.1"
 
 [tool.poetry.dev-dependencies]
 
-[tool.poetry.scripts]
-runserver = "uvicorn main:application --host 0.0.0.0 --port 49567 --reload"
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+startserver = "backend.main:run"
