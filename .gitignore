@@ -2,3 +2,5 @@
 *idea*
 *.py[cod]
 .env
+*.lock
+*.toml
