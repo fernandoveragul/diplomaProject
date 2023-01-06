@@ -12,4 +12,4 @@ EXPOSE 48569
 
 COPY . .
 
-CMD ["uvicorn", "main:application", "--host", "0.0.0.0", "--port", "48569", "--reload"]
+CMD ["uvicorn", "main:application", "--host", "localhost", "--port", "48569", "--reload"]
