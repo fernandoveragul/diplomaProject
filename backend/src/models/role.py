@@ -1,12 +1,12 @@
 from sqlalchemy import MetaData, Table, Column
-from sqlalchemy import Integer, JSON
+from sqlalchemy import Integer, String, JSON
 
-metadata = MetaData()
+metadata: MetaData = MetaData()
 
-role = Table(
+role: Table = Table(
     "role",
     metadata,
     Column("id_role", Integer, primary_key=True),
-    Column("name", nullable=False),
+    Column("name", String, nullable=False),
     Column("permissions", JSON)
 )

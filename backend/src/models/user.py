@@ -3,11 +3,9 @@ from datetime import datetime
 from sqlalchemy import MetaData, Table, Column, ForeignKey
 from sqlalchemy import Integer, String, TIMESTAMP
 
-from .role import role
+metadata: MetaData = MetaData()
 
-metadata = MetaData()
-
-user = Table(
+user: Table = Table(
     "user",
     metadata,
     Column("id_user", Integer, primary_key=True),
@@ -15,5 +13,5 @@ user = Table(
     Column("nickname", String, nullable=False),
     Column("hashed_password", String, nullable=False),
     Column("registered_at", TIMESTAMP, default=datetime.utcnow),
-    Column("role_id", Integer, ForeignKey(role.c.id)),
+    Column("role_id", Integer, ForeignKey("role.id")),
 )
