@@ -5,7 +5,7 @@ description = "SITE FOR COLLEGE GAPOU SO AMT"
 authors = ["fernandoveragul <valentingullll@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "3.10.8"
 fastapi = {extras = ["all"], version = "^0.88.0"}
 alembic = "^1.9.1"
 databases = "^0.7.0"
