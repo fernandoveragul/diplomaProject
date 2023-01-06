@@ -10,7 +10,7 @@ async def index():
 
 
 def run():
-    uvicorn.run(app='main:application', host='0.0.0.0', port=48569, reload=True)
+    uvicorn.run(app='main:application', host='localhost', port=48569, reload=True)
 
 
 if __name__ == '__main__':
