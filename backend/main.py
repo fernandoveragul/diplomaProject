@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 import uvicorn
 
-application = FastAPI()
+application = FastAPI(
+    title='College new site'
+)
 
 
 @application.get("/")
