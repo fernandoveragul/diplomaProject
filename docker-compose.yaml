@@ -22,3 +22,11 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+
+  backend:
+    container_name: backend
+    build: services/backend
+      #commannd: poetry run uvicorn src.main:application --host localhost --port 48569
+    ports:
+      - "48569:48569"
+    
