@@ -26,7 +26,6 @@ services:
   backend:
     container_name: backend
     build: services/backend
-      #commannd: poetry run uvicorn src.main:application --host localhost --port 48569
     ports:
-      - "48569:48569"
+      - "48569:8000"
     

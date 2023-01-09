@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-import uvicorn
 
 application = FastAPI(
     title='College new site'
