@@ -28,4 +28,9 @@ services:
     build: services/backend
     ports:
       - "48569:8000"
-    
+
+  frontend:
+    container_name: frontend
+    build: services/frontend
+    ports:
+      - "15236:8080"
