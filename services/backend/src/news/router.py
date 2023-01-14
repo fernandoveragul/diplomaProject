@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from.schemas import Post
 
 router = APIRouter(
-    prefix="/post"
+    prefix="/news"
 )
 
 POSTS = [
