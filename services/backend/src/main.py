@@ -1,15 +1,9 @@
+from enum import Enum
+
 from fastapi import FastAPI
+from .posts import router as post_router
 
-application = FastAPI(
-    title='College new site'
-)
+app = FastAPI()
 
+app.include_router(post_router)
 
-@application.get("/")
-async def index():
-    return {b'HELLO WORLD': 2022}
-
-
-@application.get("/hello")
-async def hello():
-    return b"HELLO"
