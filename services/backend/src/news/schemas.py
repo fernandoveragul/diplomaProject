@@ -2,8 +2,9 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class NewPost(BaseModel):
+class Post(BaseModel):
+    id: int
     date: datetime
     author: str
     text: str
-    image: list[str]
+    images: list[str]
