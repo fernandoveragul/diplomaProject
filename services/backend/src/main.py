@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from src.about_college.router import router as about_router
 from src.entrant.router import router as entrant_router
 from src.news.router import router as news_router
