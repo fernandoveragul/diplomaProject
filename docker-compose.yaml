@@ -2,6 +2,33 @@ version: '3'
 
 services:
 
+  backend:
+    container_name: backend
+    build:
+      context: ./services/backend
+    ports:
+      - "8000:8000"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./services/frontend
+    volumes:
+      - frontend_builded:./services/frontend/build
+
+
+  web:
+    image: nginx
+    restart: always
+    ports:
+      - "80:8080"
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+      - ./services/nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
+      - frontend_builded:/var/www/frontend
+
   database:
     container_name: db
     image: postgres
@@ -22,23 +49,5 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
-
-  backend:
-    container_name: backend
-    build:
-      context: ./services/backend
-    ports:
-      - "48569:8000"
-
-  frontend:
-    container_name: frontend
-    build:
-      context: ./services/frontend
-    ports:
-      - "15236:8080"
-
-  web:
-    image: nginx
-    restart: always
 
 volume:
