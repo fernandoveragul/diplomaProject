@@ -10,8 +10,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
 
   pgadmin:
     container_name: db_admin
@@ -25,12 +25,20 @@ services:
 
   backend:
     container_name: backend
-    build: services/backend
+    build:
+      context: ./services/backend
     ports:
       - "48569:8000"
 
   frontend:
     container_name: frontend
-    build: services/frontend
+    build:
+      context: ./services/frontend
     ports:
       - "15236:8080"
+
+  web:
+    image: nginx
+    restart: always
+
+volume:
