@@ -4,7 +4,7 @@
 ``` commandline
 about porject
   [
-    frontend = vue.js
+    frontend = react.js
     backend = fastapi
   ] 
 ```
