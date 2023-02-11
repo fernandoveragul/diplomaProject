@@ -17,6 +17,8 @@ EXPOSE 8000
 
 
 
-CMD ["alembic", "revision", "--autogenerate", "-m", "'init'"]
-CMD ["alembic", "upgrade", "head"]
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+#CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+#
+#CMD ["alembic", "revision", "--autogenerate", "-m", "'init'"]
+#CMD ["alembic", "upgrade", "head"]

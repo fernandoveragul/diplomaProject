@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import MetaData, Table, Column
+from sqlalchemy import MetaData, Table, Column, JSON
 from sqlalchemy import UUID, TIMESTAMP, String
 
 news_meta = MetaData()
@@ -13,5 +13,6 @@ posts: Table = Table(
     Column("time_post", TIMESTAMP, nullable=False, default=datetime.utcnow),
     Column("author_post", UUID, nullable=False),
     Column("header_post", String, nullable=False),
-    Column("text_post", String)
+    Column("text_post", String),
+    Column("images", JSON, nullable=True)
 )

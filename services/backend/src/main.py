@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from src.users.router import router as users_router
 from src.auth.router import auth_router
 from src.news.router import news_router
@@ -19,8 +18,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"]
 )
-
-# app.add_middleware(HTTPSRedirectMiddleware)
 
 app.include_router(users_router)
 app.include_router(news_router, tags=["routes with news essence"])
