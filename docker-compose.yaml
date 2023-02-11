@@ -1,4 +1,4 @@
-version: '3'
+version: '3.9'
 
 services:
 
@@ -20,13 +20,12 @@ services:
       context: ./services/backend
     restart: always
     volumes:
-      - ./services/backend:/app:rw
+      - ./services/backend:/app
     ports:
       - "10000:8000"
     depends_on:
-      - database
-    networks:
-      - common
+      database:
+        condition: service_healthy
 
   database:
     container_name: db
@@ -76,8 +75,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - common
 
 
   pgadmin:
@@ -91,8 +88,6 @@ services:
       - "5050:80"
     depends_on:
       - web
-    networks:
-      - common
 
 volumes:
   db_data:
