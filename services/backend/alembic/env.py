@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from src.auth.models import auth_meta
+from src.users.models import users_meta
 from src.news.models import news_meta
 from src.config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
@@ -29,7 +29,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [auth_meta, news_meta]
+target_metadata = [users_meta, news_meta]
 
 
 # other values from the config, defined by the needs of env.py,

@@ -14,5 +14,5 @@ posts: Table = Table(
     Column("author_post", UUID, nullable=False),
     Column("header_post", String, nullable=False),
     Column("text_post", String),
-    Column("images", JSON, nullable=True)
+    Column("images_post", JSON, nullable=True)
 )

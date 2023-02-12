@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 from src.config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-print(f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@db:{DB_PORT}/{DB_NAME}")
 
 Base = declarative_base()
 
