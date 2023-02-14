@@ -11,27 +11,34 @@ from src.config import SECRET_KEY, ALGO
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-class TVPassword:
+class DPassword:
     """
-    Token, Veryfi, Password and another
+    Depends password
     """
     CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    @classmethod
-    async def verify_pass(cls, *, plain_pass, hashed_pass):
-        TVPassword.CONTEXT.verify(plain_pass, hashed_pass)
+    @staticmethod
+    async def verify_pass(*, plain_pass, hashed_pass):
+        DPassword.CONTEXT.verify(plain_pass, hashed_pass)
 
-    @classmethod
-    async def do_hash(cls, *, password: str):
-        return TVPassword.CONTEXT.hash(password)
+    @staticmethod
+    async def do_hash(*, password: str):
+        return DPassword.CONTEXT.hash(password)
 
-    @classmethod
-    async def create_token(cls, *, data: dict, expires_delta: timedelta | None = None):
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+
+class DToken:
+    """
+    Depends token
+    """
+    CREDENTIALS_EXCEPTION = credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    @staticmethod
+    async def create_token(*, data: dict, expires_delta: timedelta | None = None):
+
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -41,22 +48,17 @@ class TVPassword:
         try:
             encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGO)
         except JWTError:
-            raise credentials_exception
+            raise DToken.CREDENTIALS_EXCEPTION
         return encoded_jwt
 
-    @classmethod
-    async def decode_jwt(cls, *, token):
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    @staticmethod
+    async def decode_jwt(*, token):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
             username: str = payload.get("sub")
             if username is None:
-                raise credentials_exception
+                raise DToken.CREDENTIALS_EXCEPTION
             token_data = TokenData(username=username)
         except JWTError:
-            raise credentials_exception
+            raise DToken.CREDENTIALS_EXCEPTION
         return token_data
