@@ -1,22 +1,22 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Json
 
 
 class UserBase(BaseModel):
-    nickname_user: str
     email_user: EmailStr
 
 
 class UserDB(UserBase):
-    login_user: str
+    uuid_user: UUID
+    registered_at: datetime
+    info_user: Json
     hashed_password_user: str
     role_user: UUID
 
 
-class User(UserDB):
-    uuid_user: UUID
+class User(UserBase):
     registered_at: datetime
 
     class Config:

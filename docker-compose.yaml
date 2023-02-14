@@ -28,6 +28,7 @@ services:
       DB_NAME: ${DB_NAME}
       SECRET_KEY: ${SECRET_KEY}
       ALGO: ${ALGO}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
     volumes:
       - ./services/backend:/app:rw
     ports:

@@ -6,8 +6,8 @@ from sqlalchemy import UUID, TIMESTAMP, String
 
 news_meta = MetaData()
 
-posts: Table = Table(
-    "posts",
+post: Table = Table(
+    "post",
     news_meta,
     Column("uuid_post", UUID, primary_key=True, index=True, default=uuid.uuid4),
     Column("time_post", TIMESTAMP, nullable=False, default=datetime.utcnow),

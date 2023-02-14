@@ -12,3 +12,4 @@ DB_NAME = os.environ.get("DB_NAME")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGO = os.environ.get("ALGO")
+ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")

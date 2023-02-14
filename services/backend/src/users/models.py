@@ -20,9 +20,8 @@ user: Table = Table(
     users_meta,
     Column("uuid_user", UUID, index=True, primary_key=True, default=uuid.uuid4),
     Column("registered_at", TIMESTAMP, nullable=False, default=datetime.utcnow),
-    Column("nickname_user", String, nullable=False),
     Column("email_user", String, nullable=False, unique=True),
-    Column("login_user", String, nullable=False),
     Column("hashed_password_user", String, nullable=False),
+    Column("info_user", JSON, nullable=False),
     Column("role_user", UUID, ForeignKey(role.c.uuid_role))
 )
