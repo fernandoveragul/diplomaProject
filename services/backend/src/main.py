@@ -4,7 +4,7 @@ from src.users.router import news_router as users_router
 from src.auth.router import auth_router
 from src.news.router import news_router
 
-app = FastAPI()
+app = FastAPI(title="API")
 
 origins = [
     "http://localhost:3000",
@@ -19,6 +19,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(users_router, tags=["user"])
-app.include_router(news_router, tags=["routes"])
-app.include_router(auth_router, tags=["authorization"])
+app.include_router(users_router, tags=["users"])
+app.include_router(news_router, tags=["news"])
+app.include_router(auth_router, tags=["auth"])
