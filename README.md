@@ -9,10 +9,7 @@ about porject
   ] 
 ```
 
-authors
-  [
-    [LEVI EQUB backend](https://github.com/fernandoveragul)
-    AND
-    [DRLIVSI frontend](https://github.com/JinushiMori)
-  ]
+Authors:
+* [LEVI EQUB (backend)](https://github.com/fernandoveragul)
+* [DRLIVSI (frontend)](https://github.com/JinushiMori)
 
