@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,12 +24,14 @@ async def sign_up():
 
 
 @auth_router.get("/me", status_code=status.HTTP_202_ACCEPTED)
-async def read_users_me(current_user: User):
-    ...
+async def read_users_me(access_token: str = Cookie(default=None)):
+    print(access_token)
+    print(await DAuth.decode_jwt(token=access_token))
 
 
 @auth_router.post("/token", status_code=status.HTTP_202_ACCEPTED, response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
+async def login_for_access_token(response: Response,
+                                 form_data: OAuth2PasswordRequestForm = Depends(),
                                  dauth: DAuth = Depends(DAuth)):
 
     if form_data.username == "user" and form_data.password == "pass":
@@ -37,6 +39,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         access_token = dauth.create_token(
             data={"sub": "user@mail.com"}, expires_delta=access_token_expires
         )
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
         return {"access_token": access_token, "token_type": "bearer"}
 
     usr = await dauth.get_cur_user(username=form_data.username)
