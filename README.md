@@ -1,13 +1,9 @@
 # Дипломный проект, выполненный двумя студентами
 
 ***
-``` commandline
-about porject
-  [
-    frontend = react.js
-    backend = fastapi
-  ] 
-```
+About project:
+* [FRONTEND](https://reactjs.org/)
+* [BACKEND](https://fastapi.tiangolo.com/)
 
 Authors:
 * [DRLIVSI (frontend)](https://github.com/JinushiMori)
