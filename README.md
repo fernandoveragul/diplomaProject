@@ -11,8 +11,8 @@ about porject
 ``` commandline
 authors
   [
-    [LEVI EQUB (backend)](https://github.com/fernandoveragul)
+    [LEVI EQUB (backend)]: https://github.com/fernandoveragul
     AND
-    [DRLIVSI (frontend)](https://github.com/JinushiMori)
+    [DRLIVSI (frontend)]: https://github.com/JinushiMori
   ]
 ```
