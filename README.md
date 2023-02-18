@@ -10,6 +10,5 @@ about porject
 ```
 
 Authors:
-* [LEVI EQUB (backend)](https://github.com/fernandoveragul)
 * [DRLIVSI (frontend)](https://github.com/JinushiMori)
-
+* [LEVI EQUB (backend)](https://github.com/fernandoveragul)
