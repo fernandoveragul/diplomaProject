@@ -8,11 +8,11 @@ about porject
     backend = fastapi
   ] 
 ```
-``` commandline
+
 authors
   [
     [LEVI EQUB backend](https://github.com/fernandoveragul)
     AND
     [DRLIVSI frontend](https://github.com/JinushiMori)
   ]
-```
+
