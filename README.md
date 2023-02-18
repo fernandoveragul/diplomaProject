@@ -11,8 +11,8 @@ about porject
 ``` commandline
 authors
   [
-    LEVIATHAN EQUILIBRIST
+    [LEVI EQUB (backend)](https://github.com/fernandoveragul)
     AND
-    WITCHERLIKE
+    [DRLIVSI (frontend)](https://github.com/JinushiMori)
   ]
 ```
