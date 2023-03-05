@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.users.router import news_router as users_router
+from src.users.router import user_router
 from src.auth.router import auth_router
 from src.news.router import news_router
 
@@ -19,6 +19,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(users_router, tags=["users"])
+
+@app.get("/")
+async def index():
+    return "hello"
+
+
+app.include_router(user_router, tags=["users"])
 app.include_router(news_router, tags=["news"])
 app.include_router(auth_router, tags=["auth"])

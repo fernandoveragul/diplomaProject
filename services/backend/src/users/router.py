@@ -1,37 +1,44 @@
-import uuid
-from uuid import UUID
+from fastapi import APIRouter, Depends, Body
+from pydantic import Field
 
-from fastapi import APIRouter, status, Path, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from src.auth.dependencies import DTokenGuard
+from src.users.schemas import UserAD, User, RoleDB
 
-from src.database import get_async_session
-from src.users.dependencies import DUsers
-from src.users.schemas import User
+guarder = DTokenGuard()
 
-news_router = APIRouter(prefix="/users")
+user_router = APIRouter(prefix="/usr", dependencies=[Depends(guarder)])
 
 
-@news_router.get("/", status_code=status.HTTP_200_OK, response_model=list[User])
-async def get_all_users(session: AsyncSession = Depends(get_async_session)):
-    result = await DUsers.get_all(session=session)
-    return result
-
-
-@news_router.get("/{id_user}", status_code=status.HTTP_200_OK, response_model=User)
-async def get_current_user(*, id_user: UUID | None = Path(default=...)):
+@user_router.get("/")
+async def get_all_users():
     ...
 
 
-@news_router.post("/")
-async def create_user():
+@user_router.get("/{user_email}", response_model=UserAD)
+async def get_more_info_user(*, user_email: str):
     ...
 
 
-@news_router.put("/")
-async def update_user():
+@user_router.post("/", response_model=UserAD)
+async def create_new_user():
     ...
 
 
-@news_router.delete("/")
-async def delete_user():
+@user_router.post("/{user_email}", response_model=UserAD)
+async def change_exist_user(*, user_email: str):
+    ...
+
+
+@user_router.delete("/{user_email}", response_model=UserAD)
+async def delete_exist_user(*, user_email: str):
+    ...
+
+
+@user_router.post("/role/", include_in_schema=True)
+async def create_new_role(role: RoleDB):
+    ...
+
+
+@user_router.post("/role/{role_name}", include_in_schema=True)
+async def change_exist_role(*, role_name: str):
     ...

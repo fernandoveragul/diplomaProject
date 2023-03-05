@@ -1,102 +1,67 @@
-from datetime import timedelta, datetime
-from typing import Coroutine
+from datetime import datetime, timedelta
 
-from fastapi import HTTPException, status, Depends
-from fastapi.security.oauth2 import OAuth2PasswordBearer
+from fastapi import Request, HTTPException, status, Depends
 from jose import jwt, JWTError
-from passlib.context import CryptContext
-from pydantic import EmailStr
-from sqlalchemy import select
+
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, Row
 
-from src import config
 from src.auth.schemas import TokenData
-from src.config import SECRET_KEY, ALGO
+from src.config import SECRET_KEY, ALGO, ACCESS_TOKEN_EXPIRE_MINUTES
 from src.database import get_async_session
-from src.users.models import user
-from src.users.schemas import User
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class DPassword:
-    """
-    Depends password
-    """
-    CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    @staticmethod
-    async def verify_pass(*, plain_pass, hashed_pass):
-        DPassword.CONTEXT.verify(plain_pass, hashed_pass)
-
-    @staticmethod
-    async def do_hash(*, password: str):
-        return DPassword.CONTEXT.hash(password)
+from src.users.models import User
 
 
 class DToken:
-    """
-    Depends token
-    """
     CREDENTIALS_EXCEPTION = credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="/login/token")
-
     @staticmethod
-    def create_token(*, data: dict, expires_delta: timedelta | None = None):
+    async def _get_current_user(*, user_email: str, session: AsyncSession = Depends(get_async_session)) -> Row | None:
+        response = await session.execute(select(User).where(User.email_user == user_email))
+        response_ = response.first()
+        return response_
+
+    def generate_access_token(self, *, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.utcnow() + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
         try:
             encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGO)
         except JWTError:
-            raise DToken.CREDENTIALS_EXCEPTION
+            raise self.CREDENTIALS_EXCEPTION
         return encoded_jwt
 
-    @staticmethod
-    async def decode_jwt(*, token):
+    def decode_access_token(self, *, token):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
             username: str = payload.get("sub")
+            scopes: list[str] = payload.get("scopes")
+            print(username, scopes)
             if username is None:
-                raise DToken.CREDENTIALS_EXCEPTION
-            token_data = TokenData(username=username)
+                raise self.CREDENTIALS_EXCEPTION
+            token_data = TokenData(username=username, scopes=scopes)
         except JWTError:
-            raise DToken.CREDENTIALS_EXCEPTION
+            raise self.CREDENTIALS_EXCEPTION
         return token_data
 
+    def update_access_token(self):
+        ...
 
-class DAuth(DPassword, DToken):
-    @staticmethod
-    async def get_cur_user(*, username: str, session: AsyncSession = Depends(get_async_session)) -> User:
-        usr = await session.execute(select(user).where(user.c.email_user == username))
-        return User.from_orm(usr.first())
 
-    @staticmethod
-    async def authenticate_user(*, usr: User, password: str):
-        if not usr:
-            raise DAuth.CREDENTIALS_EXCEPTION
-        if not DAuth.verify_pass(plain_pass=password, hashed_pass=usr.hashed_password_user):
-            raise DAuth.CREDENTIALS_EXCEPTION
-        return usr
+class DTokenGuard(DToken):
+    EXCEPTION_HAVE_NOT_COOKIE = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access forbidden. You are not administrator"
+    )
 
-    @staticmethod
-    async def get_current_user_from_token(token: str = Depends(DToken.OAUTH2_SCHEME)):
-        try:
-            payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGO])
-            username: str = payload.get("sub")
-            if username is None:
-                raise DToken.CREDENTIALS_EXCEPTION
-        except JWTError:
-            raise DToken.CREDENTIALS_EXCEPTION
-        usr = DAuth.get_cur_user(username=username)
-        if usr is None:
-            raise DToken.CREDENTIALS_EXCEPTION
-        return usr
+    def __call__(self, request: Request):
+        if "access_token" not in request.cookies:
+            raise self.EXCEPTION_HAVE_NOT_COOKIE
+        return self.decode_access_token(token=request.cookies.get("access_token"))
