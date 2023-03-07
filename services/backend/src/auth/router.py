@@ -2,6 +2,7 @@ import json
 
 from fastapi import APIRouter, Depends, Response, status, HTTPException, Body, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import EmailStr
 
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,14 +72,12 @@ async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Dep
 
 
 @auth_router.post("/logout",
-                  status_code=status.HTTP_200_OK,
-                  response_model=SUser.email_user)
-async def logout(request: Request = Depends(), response: Response = Depends(), token: DTokenGuard = Depends()):
+                  status_code=status.HTTP_200_OK)
+async def logout(request: Request = Depends(), token: DTokenGuard = Depends()):
     refresh_token = request.cookies.get("refresh_token")
     if access_token := request.cookies.get("access_token") and refresh_token:
-        response.delete_cookie(key="access_token", httponly=True, secure=True)
-        response.delete_cookie(key="refresh_token", httponly=True, secure=True)
+        await token.delete_cookie_tokens()
         data = await token.decode_access_token(token=access_token)
-        return data.username
+        # return data.username
     else:
         raise token.HAVE_NOT_COOKIE

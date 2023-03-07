@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Body
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
@@ -18,7 +18,7 @@ guarder = DTokenGuard()
                  response_model=list[SNews])
 async def get_all_news_posts(session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews))
-    if response:
+    if response.first():
         result: list[SNewsDB] = [SNewsDB(news_post) for news_post in response.all()]
         return result
     else:
@@ -26,17 +26,18 @@ async def get_all_news_posts(session: AsyncSession = Depends(get_async_session))
                             detail=f"Invalid request")
 
 
-@news_router.get("/{post_data}",
-                 response_model=SNews,
-                 status_code=status.HTTP_200_OK)
-async def get_single_news_post(*, post_data: SNewsPostData, session: AsyncSession = Depends(get_async_session)):
-    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data.uuid_news))
+@news_router.get("/{post_data_single}",
+                 status_code=status.HTTP_200_OK,
+                 response_model=SNews)
+async def get_single_news_post(post_data_single: SNewsPostData,
+                               session: AsyncSession = Depends(get_async_session)):
+    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_single.uuid_news))
     if response.first():
         result = SNewsDB(response.first())
         return result
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Invalid got data for get\n{json.dumps(post_data.dict(), indent=4)}")
+                            detail=f"Invalid got data for get\n{json.dumps(post_data_single.dict(), indent=4)}")
 
 
 @news_router.post("/", status_code=status.HTTP_201_CREATED,
@@ -57,15 +58,16 @@ async def create_new_news_post(*, news_post: SNews, session: AsyncSession = Depe
         raise invalid_take_data
 
 
-@news_router.post("/{post_data}", status_code=status.HTTP_202_ACCEPTED,
+@news_router.post("/{post_data_update}", status_code=status.HTTP_202_ACCEPTED,
                   response_model=SNews,
                   dependencies=[Depends(guarder)])
-async def change_exist_news_post(*, post_data: SNewsPostData, news_post: SNews,
+async def change_exist_news_post(*, post_data_update: SNewsPostData,
+                                 news_post: SNews,
                                  session: AsyncSession = Depends(get_async_session)):
     invalid_take_data = HTTPException(status_code=status.HTTP_409_CONFLICT,
                                       detail=f"Invalid got data for update\n{json.dumps(news_post.dict(), indent=4)}")
 
-    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data))
+    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_update))
     if response.first():
         try:
             await session.execute(update(MNews).values(**news_post.dict()))
@@ -75,16 +77,17 @@ async def change_exist_news_post(*, post_data: SNewsPostData, news_post: SNews,
             raise invalid_take_data
 
 
-@news_router.delete("/{post_data}",
+@news_router.delete("/{post_data_delete}",
                     status_code=status.HTTP_202_ACCEPTED,
                     response_model=SNewsPostData,
                     dependencies=[Depends(guarder)])
-async def delete_exist_news_post(*, post_data: SNewsPostData, session: AsyncSession = Depends(get_async_session)):
-    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data.uuid_news))
+async def delete_exist_news_post(*, post_data_delete: SNewsPostData,
+                                 session: AsyncSession = Depends(get_async_session)):
+    response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_delete.uuid_news))
     if response.first():
-        await session.execute(delete(MNews).where(MNews.uuid_news == post_data.uuid_news))
+        await session.execute(delete(MNews).where(MNews.uuid_news == post_data_delete.uuid_news))
         await session.commit()
-        return post_data
+        return post_data_delete
     else:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail=f"Invalid got data for delete\n{json.dumps(post_data.dict(), indent=4)}")
+                            detail=f"Invalid got data for delete\n{json.dumps(post_data_delete.dict(), indent=4)}")

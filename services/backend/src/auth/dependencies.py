@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import Request, HTTPException, status, Depends
+from fastapi import Request, HTTPException, status, Depends, Response
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
@@ -49,6 +49,11 @@ class DToken:
         response = await session.execute(select(MUser).where(MUser.email_user == user_email))
         response_ = response.first()
         return response_
+
+    @staticmethod
+    async def delete_cookie_tokens(response: Response = Depends()):
+        response.delete_cookie(key="access_token", httponly=True, secure=True)
+        response.delete_cookie(key="refresh_token", httponly=True, secure=True)
 
     async def generate_token(self, *, data: dict, token_type: str) -> str:
         to_encode = data.copy()
