@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
+class SToken(BaseModel):
     access_token: str
     token_type: str
 
 
-class TokenData(BaseModel):
+class STokenData(BaseModel):
     username: str | None = None
     scope: list[str] | None = None

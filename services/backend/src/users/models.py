@@ -6,13 +6,13 @@ from sqlalchemy import Column, UUID, String, TIMESTAMP, ForeignKey, JSON
 from src.database import Base
 
 
-class RoleUser(Base):
+class MRoleUser(Base):
     __tablename__ = "role"
     role = Column(String, primary_key=True, default="default")
     permissions = Column(JSON, nullable=False)
 
 
-class Users(Base):
+class MUser(Base):
     __tablename__ = "user"
 
     uuid_user = Column(UUID, primary_key=True, default=uuid.uuid4())

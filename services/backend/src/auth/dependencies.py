@@ -7,10 +7,10 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Row
 
-from src.auth.schemas import TokenData
+from src.auth.schemas import STokenData
 from src.config import SECRET_KEY, ALGO, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 from src.database import get_async_session
-from src.users.models import Users
+from src.users.models import MUser
 
 
 class DPassword:
@@ -46,7 +46,7 @@ class DToken:
 
     @staticmethod
     async def get_current_user(*, user_email: str, session: AsyncSession = Depends(get_async_session)) -> Row | None:
-        response = await session.execute(select(Users).where(Users.email_user == user_email))
+        response = await session.execute(select(MUser).where(MUser.email_user == user_email))
         response_ = response.first()
         return response_
 
@@ -73,8 +73,8 @@ class DToken:
             raise self.CREDENTIALS_EXCEPTION
         return encoded_jwt
 
-    async def decode_access_token(self, *, token: str) -> TokenData | None:
-        token_data: TokenData | None = None
+    async def decode_access_token(self, *, token: str) -> STokenData | None:
+        token_data: STokenData | None = None
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
             username: str = payload.get("sub")
@@ -84,7 +84,7 @@ class DToken:
                 raise self.CREDENTIALS_EXCEPTION
             if await self.get_current_user(user_email=username) is None:
                 raise self.CREDENTIALS_EXCEPTION
-            token_data = TokenData(username=username, scopes=scopes)
+            token_data = STokenData(username=username, scopes=scopes)
         except JWTError:
             await self.update_access_token()
         return token_data

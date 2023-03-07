@@ -6,7 +6,7 @@ from sqlalchemy import Column, UUID, String, Text, TIMESTAMP, ForeignKey, JSON
 from src.database import Base
 
 
-class News(Base):
+class MNews(Base):
     __tablename__ = "news"
 
     uuid_news = Column(UUID, primary_key=True, default=uuid.uuid4())
