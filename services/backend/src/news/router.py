@@ -19,21 +19,21 @@ guarder = DTokenGuard()
 async def get_all_news_posts(session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews))
     if response.first():
-        result: list[SNewsDB] = [SNewsDB(news_post) for news_post in response.all()]
+        result: list[SNewsDB] = [SNewsDB(news_post) for news_post in response.fetchall()]
         return result
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Invalid request")
 
 
-@news_router.get("/{post_data_single}",
+@news_router.get("/single",
                  status_code=status.HTTP_200_OK,
                  response_model=SNews)
 async def get_single_news_post(post_data_single: SNewsPostData,
                                session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_single.uuid_news))
-    if response.first():
-        result = SNewsDB(response.first())
+    if res := response.first():
+        result = SNewsDB(res)
         return result
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -43,7 +43,8 @@ async def get_single_news_post(post_data_single: SNewsPostData,
 @news_router.post("/", status_code=status.HTTP_201_CREATED,
                   response_model=SNews,
                   dependencies=[Depends(guarder)])
-async def create_new_news_post(*, news_post: SNews, session: AsyncSession = Depends(get_async_session)):
+async def create_new_news_post(*, news_post: SNews,
+                               session: AsyncSession = Depends(get_async_session)):
     invalid_take_data = HTTPException(status_code=status.HTTP_409_CONFLICT,
                                       detail=f"Invalid got data for create\n{json.dumps(news_post.dict(), indent=4)}")
 
@@ -54,15 +55,13 @@ async def create_new_news_post(*, news_post: SNews, session: AsyncSession = Depe
         return news_post
     except SQLAlchemyError:
         raise invalid_take_data
-    except TypeError:
-        raise invalid_take_data
 
 
-@news_router.post("/{post_data_update}", status_code=status.HTTP_202_ACCEPTED,
+@news_router.post("/update", status_code=status.HTTP_202_ACCEPTED,
                   response_model=SNews,
                   dependencies=[Depends(guarder)])
 async def change_exist_news_post(*, post_data_update: SNewsPostData,
-                                 news_post: SNews,
+                                 news_post: SNews = Body(...),
                                  session: AsyncSession = Depends(get_async_session)):
     invalid_take_data = HTTPException(status_code=status.HTTP_409_CONFLICT,
                                       detail=f"Invalid got data for update\n{json.dumps(news_post.dict(), indent=4)}")
@@ -77,7 +76,7 @@ async def change_exist_news_post(*, post_data_update: SNewsPostData,
             raise invalid_take_data
 
 
-@news_router.delete("/{post_data_delete}",
+@news_router.delete("/delete",
                     status_code=status.HTTP_202_ACCEPTED,
                     response_model=SNewsPostData,
                     dependencies=[Depends(guarder)])

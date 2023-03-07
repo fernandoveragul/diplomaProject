@@ -1,12 +1,15 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field, Json, EmailStr, UUID4, StrBytes
+from pydantic import BaseModel, Field, EmailStr, UUID4
 
 
-class SRoleDB(BaseModel):
+class SRolePermissions(BaseModel):
+    permissions: list[str] = Field(default=[""])
+
+
+class SRoleDB(SRolePermissions):
     role: str = Field(default="default")
-    permissions: Json = Field(default={"permissions": []})
 
     class Config:
         orm_mode = True

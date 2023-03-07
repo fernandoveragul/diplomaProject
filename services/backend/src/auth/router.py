@@ -73,11 +73,11 @@ async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Dep
 
 @auth_router.post("/logout",
                   status_code=status.HTTP_200_OK)
-async def logout(request: Request = Depends(), token: DTokenGuard = Depends()):
+async def logout(request: Request, token: DTokenGuard = Depends()):
     refresh_token = request.cookies.get("refresh_token")
     if access_token := request.cookies.get("access_token") and refresh_token:
         await token.delete_cookie_tokens()
         data = await token.decode_access_token(token=access_token)
-        # return data.username
+        return data.username
     else:
         raise token.HAVE_NOT_COOKIE

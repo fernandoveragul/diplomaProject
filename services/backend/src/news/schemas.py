@@ -5,7 +5,7 @@ from pydantic import Field, EmailStr, UUID4, BaseModel
 
 
 class SImages(BaseModel):
-    paths: list[str] = Field(default=[], title="This is a list paths to images current news post")
+    paths: list[str] = Field(default=[""], title="This is a list paths to images current news post")
 
 
 class SNewsPostData(BaseModel):
