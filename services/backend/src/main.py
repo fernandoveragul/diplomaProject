@@ -4,8 +4,6 @@ from src.users.router import user_router
 from src.auth.router import auth_router
 from src.news.router import news_router
 
-import uvicorn
-
 app = FastAPI(title="API")
 
 origins = [
@@ -25,6 +23,3 @@ app.add_middleware(
 app.include_router(user_router, tags=["users"])
 app.include_router(news_router, tags=["news"])
 app.include_router(auth_router, tags=["auth"])
-
-if __name__ == '__main__':
-    uvicorn.run("src.main:app", reload=True)
