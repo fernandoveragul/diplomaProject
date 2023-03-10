@@ -14,8 +14,10 @@ news_router = APIRouter(prefix="/nws")
 guarder = DTokenGuard()
 
 
-@news_router.get("/", status_code=status.HTTP_200_OK,
-                 response_model=list[SNews])
+@news_router.get("/",
+                 status_code=status.HTTP_200_OK,
+                 response_model=list[SNews],
+                 summary="Endpoint return list all news posts")
 async def get_all_news_posts(session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews))
     if response.first():
@@ -28,8 +30,9 @@ async def get_all_news_posts(session: AsyncSession = Depends(get_async_session))
 
 @news_router.get("/single",
                  status_code=status.HTTP_200_OK,
-                 response_model=SNews)
-async def get_single_news_post(post_data_single: SNewsPostData,
+                 response_model=SNews,
+                 summary="Endpoint return single news post")
+async def get_single_news_post(post_data_single: SNewsPostData = Body(..., alias="postDataSingle"),
                                session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_single.uuid_news))
     if res := response.first():
@@ -37,16 +40,17 @@ async def get_single_news_post(post_data_single: SNewsPostData,
         return result
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Invalid got data for get\n{json.dumps(post_data_single.dict(), indent=4)}")
+                            detail=f"Invalid request data\ndata: {json.dumps(post_data_single.dict(), indent=4)}")
 
 
 @news_router.post("/", status_code=status.HTTP_201_CREATED,
                   response_model=SNews,
-                  dependencies=[Depends(guarder)])
-async def create_new_news_post(*, news_post: SNews,
+                  dependencies=[Depends(guarder)],
+                  summary="Endpoint create new news post")
+async def create_new_news_post(news_post: SNews = Body(..., alias="newsPost"),
                                session: AsyncSession = Depends(get_async_session)):
     invalid_take_data = HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                      detail=f"Invalid got data for create\n{json.dumps(news_post.dict(), indent=4)}")
+                                      detail=f"Invalid request data\ndata: {json.dumps(news_post.dict(), indent=4)}")
 
     try:
         values: SNewsDB = SNewsDB(**news_post.dict())
@@ -59,12 +63,13 @@ async def create_new_news_post(*, news_post: SNews,
 
 @news_router.post("/update", status_code=status.HTTP_202_ACCEPTED,
                   response_model=SNews,
-                  dependencies=[Depends(guarder)])
-async def change_exist_news_post(*, post_data_update: SNewsPostData,
-                                 news_post: SNews = Body(...),
+                  dependencies=[Depends(guarder)],
+                  summary="Endpoint change exist news post")
+async def change_exist_news_post(post_data_update: SNewsPostData = Body(..., alias="postDataUpdate"),
+                                 news_post: SNews = Body(..., alias="newsPost"),
                                  session: AsyncSession = Depends(get_async_session)):
     invalid_take_data = HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                      detail=f"Invalid got data for update\n{json.dumps(news_post.dict(), indent=4)}")
+                                      detail=f"Invalid request data\ndata: {json.dumps(news_post.dict(), indent=4)}")
 
     response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_update))
     if response.first():
@@ -79,8 +84,9 @@ async def change_exist_news_post(*, post_data_update: SNewsPostData,
 @news_router.delete("/delete",
                     status_code=status.HTTP_202_ACCEPTED,
                     response_model=SNewsPostData,
-                    dependencies=[Depends(guarder)])
-async def delete_exist_news_post(*, post_data_delete: SNewsPostData,
+                    dependencies=[Depends(guarder)],
+                    summary="Endpoint delete exist news post")
+async def delete_exist_news_post(post_data_delete: SNewsPostData = Body(..., alias="postDataDelete"),
                                  session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MNews).where(MNews.uuid_news == post_data_delete.uuid_news))
     if response.first():
@@ -89,4 +95,4 @@ async def delete_exist_news_post(*, post_data_delete: SNewsPostData,
         return post_data_delete
     else:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail=f"Invalid got data for delete\n{json.dumps(post_data_delete.dict(), indent=4)}")
+                            detail=f"Invalid request data\ndata: {json.dumps(post_data_delete.dict(), indent=4)}")

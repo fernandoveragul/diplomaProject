@@ -21,8 +21,9 @@ auth_router = APIRouter(prefix="/auth")
 
 @auth_router.post("/sign-up",
                   status_code=status.HTTP_201_CREATED,
-                  response_model=SUser)
-async def sign_up(user_data: SUserAD,
+                  response_model=SUser,
+                  summary="Endpoint register user")
+async def sign_up(user_data: SUserAD = Body(..., alias="userData"),
                   password: str = Body(...),
                   passer: DPassword = Depends(),
                   session: AsyncSession = Depends(get_async_session)):
@@ -41,7 +42,8 @@ async def sign_up(user_data: SUserAD,
 
 @auth_router.post("/sign-in",
                   status_code=status.HTTP_202_ACCEPTED,
-                  response_model=SToken)
+                  response_model=SToken,
+                  summary="Endpoint login user (grand_type = access or refresh)")
 async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),
                   guard: DTokenGuard = Depends(), passer: DPassword = Depends()):
     if form_data.grant_type not in ["access", "refresh"]:
@@ -72,7 +74,8 @@ async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Dep
 
 
 @auth_router.post("/logout",
-                  status_code=status.HTTP_200_OK)
+                  status_code=status.HTTP_200_OK,
+                  summary="Endpoint clean cookie")
 async def logout(request: Request, token: DTokenGuard = Depends()):
     refresh_token = request.cookies.get("refresh_token")
     if access_token := request.cookies.get("access_token") and refresh_token:

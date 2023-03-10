@@ -9,14 +9,14 @@ class SImages(BaseModel):
 
 
 class SNewsPostData(BaseModel):
-    uuid_news: UUID4 = Field(default=uuid.uuid4())
-    author_news: EmailStr = Field(default=..., title="This is an author news post")
+    uuid_news: UUID4 = Field(default=uuid.uuid4(), alias="uuidNews")
+    author_news: EmailStr = Field(default=..., title="This is an author news post", alias="authorNews")
 
 
 class SNews(BaseModel):
-    header_news: str = Field(default="HEADER", title="This is a header news post")
-    text_news: str = Field(default="TEXT", title="This is a text news post")
-    author_news: EmailStr = Field(default=..., title="This is an author news post")
+    header_news: str = Field(default="HEADER", title="This is a header news post", alias="headerNews")
+    text_news: str = Field(default="TEXT", title="This is a text news post", alias="textNews")
+    author_news: EmailStr = Field(default=..., title="This is an author news post", alias="authorNews")
     images: SImages = Field(default=..., title="This is a list paths to images current news post")
 
 
