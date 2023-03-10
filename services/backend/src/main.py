@@ -22,11 +22,6 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def index():
-    return "hello"
-
-
 app.include_router(user_router, tags=["users"])
 app.include_router(news_router, tags=["news"])
 app.include_router(auth_router, tags=["auth"])
