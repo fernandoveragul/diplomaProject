@@ -2,7 +2,6 @@ import json
 
 from fastapi import APIRouter, Depends, Response, status, HTTPException, Body, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import EmailStr
 
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
