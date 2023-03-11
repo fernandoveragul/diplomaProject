@@ -8,26 +8,23 @@ class SImages(BaseModel):
     paths: list[str] = Field(default=[""], title="This is a list paths to images current news post")
 
 
-class SNewsPostData(BaseModel):
-    uuid_news: UUID4 = Field(default=uuid.uuid4(), alias="uuidNews")
+class SNewsPostBase(BaseModel):
     author_news: EmailStr = Field(default=..., title="This is an author news post", alias="authorNews")
 
 
-class SNews(BaseModel):
+class SNews(SNewsPostBase):
     header_news: str = Field(default="HEADER", title="This is a header news post", alias="headerNews")
     text_news: str = Field(default="TEXT", title="This is a text news post", alias="textNews")
-    author_news: EmailStr = Field(default=..., title="This is an author news post", alias="authorNews")
-    images: SImages = Field(default=..., title="This is a list paths to images current news post")
-
-
-class SNewsDB(SNews):
-    uuid_news: UUID4 = Field(default=uuid.uuid4())
-    created_at: datetime = Field(default=datetime.utcnow())
+    images: SImages | None = Field(default=None, title="This is a list paths to images current news post")
     specific: str | None = Field(default=None, title="This is a specific type news post")
-
-    class Config:
-        orm_mode = True
 
 
 class SNewsAD(SNews):
-    specific: str | None = Field(default=None, title="This is a specific type news post")
+    uuid_news: UUID4 = Field(default=uuid.uuid4(), alias="uuidNews")
+    created_at: datetime = Field(default=datetime.utcnow(), alias="createdAt")
+
+
+class SNewsDB(SNewsAD):
+
+    class Config:
+        orm_mode = True

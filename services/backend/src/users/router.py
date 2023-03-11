@@ -5,13 +5,13 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.auth.dependencies import DTokenGuard
+from src.auth.dependencies import DTokenGuard, DPassword
 from src.database import get_async_session
 from src.users.models import MUser, MRoleUser
 from src.users.schemas import SUserAD, SUser, SRoleDB, SUserDB, SRole
 
 guarder = DTokenGuard()
-
+passer = DPassword()
 user_router = APIRouter(prefix="/usr", dependencies=[Depends(guarder)])
 
 
@@ -21,8 +21,12 @@ user_router = APIRouter(prefix="/usr", dependencies=[Depends(guarder)])
                  summary="Endpoint return list all users")
 async def get_all_users(session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MUser))
-    result = [SUserDB(user) for user in response.all()]
-    return result
+    if response.scalars().first():
+        result: list[SUserDB] = [SUserDB.from_orm(user) for user in response.scalars().all()]
+        return result
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Invalid request")
 
 
 @user_router.get("/single",
@@ -32,8 +36,8 @@ async def get_all_users(session: AsyncSession = Depends(get_async_session)):
 async def get_more_info_user(user_data: SUser = Body(..., alias="userData"),
                              session: AsyncSession = Depends(get_async_session)):
     response = await session.execute(select(MUser).where(MUser.email_user == user_data.email_user))
-    if result := response.first():
-        return SUserDB(result)
+    if res := response.scalars().first():
+        return SUserDB.from_orm(res)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Can't find user with email: {user_data.email_user}")
@@ -44,8 +48,9 @@ async def get_more_info_user(user_data: SUser = Body(..., alias="userData"),
                   response_model=SUserAD,
                   summary="Endpoint create new user")
 async def create_new_user(user_data: SUserAD = Body(..., alias="userData"),
+                          password: str = Body(...),
                           session: AsyncSession = Depends(get_async_session)):
-    data = SUserDB(**user_data.dict())
+    data = SUserDB(**user_data.dict(), hashed_password=await passer.do_hash(password=password))
     try:
         await session.execute(insert(MUser).values(**data.dict()))
         await session.commit()
@@ -59,11 +64,13 @@ async def create_new_user(user_data: SUserAD = Body(..., alias="userData"),
                   status_code=status.HTTP_202_ACCEPTED,
                   response_model=SUserAD,
                   summary="Endpoint change exist user")
-async def change_exist_user(user_data: SUser = Body(..., alias="userData"),
+async def change_exist_user(user_data: SUser = Body(..., alias="userDataExist"),
+                            user_data_new: SUserAD = Body(..., alias="userDataNew"),
                             session: AsyncSession = Depends(get_async_session)):
-    data = SUserDB(**user_data.dict())
     response = await session.execute(select(MUser).where(MUser.email_user == user_data.email_user))
-    if response.first():
+    if res := response.scalars().first():
+        data = SUserDB.from_orm(res)
+        data.__dict__.update(user_data_new.dict())
         await session.execute(update(MUser).values(**data.dict()))
         await session.commit()
         return data
@@ -97,9 +104,8 @@ async def delete_exist_user(user_data: SUser = Body(..., alias="userData"),
                   summary="Endpoint create new role",
                   include_in_schema=True)
 async def create_new_role(role: SRole = Body(...),
-                          permissions: list[str] = Body(..., embed=True),
                           session: AsyncSession = Depends(get_async_session)):
-    data = SRoleDB(**role.dict(), permissions=permissions)
+    data = SRoleDB(**role.dict())
     try:
         await session.execute(insert(MRoleUser).values(**data.dict()))
     except SQLAlchemyError:
@@ -113,9 +119,8 @@ async def create_new_role(role: SRole = Body(...),
                   summary="Endpoint change exist role",
                   include_in_schema=True)
 async def change_exist_role(role: SRole = Body(...),
-                            permissions: list[str] = Body(...),
                             session: AsyncSession = Depends(get_async_session)):
-    data = SRoleDB(**role.dict(), permissions=permissions)
+    data = SRoleDB(**role.dict())
     try:
         await session.execute(update(MRoleUser).values(**data.dict()))
     except SQLAlchemyError:

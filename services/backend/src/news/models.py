@@ -11,7 +11,7 @@ class MNews(Base):
 
     uuid_news = Column(UUID, primary_key=True, default=uuid.uuid4())
     header_news = Column(String, nullable=False, default="HEADER")
-    text_news = Column(Text, nullable=True, default="TEXT")
+    text_news = Column(Text, nullable=False, default="TEXT")
     created_at = Column(TIMESTAMP, default=datetime.utcnow(), nullable=False)
     author_news = Column(String, ForeignKey("user.email_user"), nullable=False)
     images = Column(JSON, default={"paths": []}, nullable=True)

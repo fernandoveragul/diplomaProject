@@ -26,13 +26,13 @@ async def sign_up(user_data: SUserAD = Body(..., alias="userData"),
                   password: str = Body(...),
                   passer: DPassword = Depends(),
                   session: AsyncSession = Depends(get_async_session)):
-
     usr = SUserDB(email_user=user_data.email_user,
                   hashed_password=await passer.do_hash(password=password),
                   personal_data=user_data.personal_data,
                   role_user=user_data.role_user)
     try:
         await session.execute(insert(MUser).values(**usr.dict()))
+        await session.commit()
         return usr
     except SQLAlchemyError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
@@ -42,9 +42,11 @@ async def sign_up(user_data: SUserAD = Body(..., alias="userData"),
 @auth_router.post("/sign-in",
                   status_code=status.HTTP_202_ACCEPTED,
                   response_model=SToken,
-                  summary="Endpoint login user (grand_type = access or refresh)")
-async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),
-                  guard: DTokenGuard = Depends(), passer: DPassword = Depends()):
+                  summary="Endpoint login user (grant_type = access or refresh)")
+async def sign_in(response: Response,
+                  form_data: OAuth2PasswordRequestForm = Depends(),
+                  guard: DTokenGuard = Depends(),
+                  passer: DPassword = Depends()):
     if form_data.grant_type not in ["access", "refresh"]:
         raise guard.HAVE_NOT_TOKEN_TYPE
 
@@ -75,11 +77,13 @@ async def sign_in(response: Response, form_data: OAuth2PasswordRequestForm = Dep
 @auth_router.post("/logout",
                   status_code=status.HTTP_200_OK,
                   summary="Endpoint clean cookie")
-async def logout(request: Request, token: DTokenGuard = Depends()):
+async def logout(request: Request,
+                 response: Response,
+                 token: DTokenGuard = Depends()):
     refresh_token = request.cookies.get("refresh_token")
     if access_token := request.cookies.get("access_token") and refresh_token:
-        await token.delete_cookie_tokens()
-        data = await token.decode_access_token(token=access_token)
+        await token.delete_cookie_tokens(response=response)
+        data = await token.decode_access_token(token=access_token, request=request)
         return data.username
     else:
         raise token.HAVE_NOT_COOKIE

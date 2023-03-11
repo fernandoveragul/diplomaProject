@@ -30,7 +30,7 @@ class DToken:
     )
 
     HAVE_NOT_TOKEN_TYPE = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="Not found token type. Try later."
     )
 
@@ -47,11 +47,11 @@ class DToken:
     @staticmethod
     async def get_current_user(*, user_email: str, session: AsyncSession = Depends(get_async_session)) -> Row | None:
         response = await session.execute(select(MUser).where(MUser.email_user == user_email))
-        response_ = response.first()
+        response_ = response.scalars().first()
         return response_
 
     @staticmethod
-    async def delete_cookie_tokens(response: Response = Depends()):
+    async def delete_cookie_tokens(response: Response):
         response.delete_cookie(key="access_token", httponly=True, secure=True)
         response.delete_cookie(key="refresh_token", httponly=True, secure=True)
 
@@ -78,7 +78,7 @@ class DToken:
             raise self.CREDENTIALS_EXCEPTION
         return encoded_jwt
 
-    async def decode_access_token(self, *, token: str) -> STokenData | None:
+    async def decode_access_token(self, *, token: str, request: Request) -> STokenData | None:
         token_data: STokenData | None = None
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
@@ -91,10 +91,10 @@ class DToken:
                 raise self.CREDENTIALS_EXCEPTION
             token_data = STokenData(username=username, scopes=scopes)
         except JWTError:
-            await self.update_access_token()
+            await self.update_access_token(request=request)
         return token_data
 
-    async def update_access_token(self, request: Request = Depends()) -> None:
+    async def update_access_token(self, request: Request) -> None:
         if r_token := request.cookies.get("refresh_token"):
             try:
                 payload = jwt.decode(r_token, SECRET_KEY, algorithms=[ALGO])
@@ -113,4 +113,4 @@ class DTokenGuard(DToken):
     async def __call__(self, request: Request):
         if "access_token" not in request.cookies:
             raise self.HAVE_NOT_COOKIE
-        return await self.decode_access_token(token=request.cookies.get("access_token"))
+        return await self.decode_access_token(token=request.cookies.get("access_token"), request=request)
