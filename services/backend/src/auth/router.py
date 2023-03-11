@@ -26,13 +26,13 @@ async def sign_up(user_data: SUserAD = Body(..., alias="userData"),
                   password: str = Body(...),
                   passer: DPassword = Depends(),
                   session: AsyncSession = Depends(get_async_session)):
+
     usr = SUserDB(email_user=user_data.email_user,
                   hashed_password=await passer.do_hash(password=password),
                   personal_data=user_data.personal_data,
                   role_user=user_data.role_user)
     try:
         await session.execute(insert(MUser).values(**usr.dict()))
-        await session.commit()
         return usr
     except SQLAlchemyError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
@@ -42,11 +42,12 @@ async def sign_up(user_data: SUserAD = Body(..., alias="userData"),
 @auth_router.post("/sign-in",
                   status_code=status.HTTP_202_ACCEPTED,
                   response_model=SToken,
-                  summary="Endpoint login user (grant_type = access or refresh)")
+                  summary="Endpoint login user (grand_type = access or refresh)")
 async def sign_in(response: Response,
                   form_data: OAuth2PasswordRequestForm = Depends(),
                   guard: DTokenGuard = Depends(),
                   passer: DPassword = Depends()):
+
     if form_data.grant_type not in ["access", "refresh"]:
         raise guard.HAVE_NOT_TOKEN_TYPE
 
